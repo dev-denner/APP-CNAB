@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Author: denners777@hotmail.com
+   ========================================================================== */
+
+@import 'bootstrap.less';
+@import 'bootstrap-theme.less';
+@import 'sticky_footer.less';
+@import 'datatable.less';
+@import 'bootstrap-tables.less';
+@import 'tablecloth.less';
+@import 'prettify.less';
+@import 'font-awesome.less';
+
+.peso(@p) when (@p = n){font-weight: normal; }
+.peso(@p) when (@p = l){font-weight: lighter; }
+.peso(@p) when (@p = b){font-weight: bold; }
+
+.tam(@t){font-size: @t;}
+
+
+#logo{
+  background: url('../img/logo.png');
+  width: 99px;
+  height: 52px;
+  display: block;
+  margin: 0;
+}
+.table{
+  &.dataTable {
+    border-collapse: collapse;
+    thead{
+      th{
+        border-bottom: 1px solid #dddddd;
+      }
+    }
+  }
+  tr th{
+    text-align: center;
+  }
+  tr td{
+    vertical-align: middle !important;
+  }
+}
+
+select{
+  min-height: 26px;
+}
+.overlay{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  .media{
+    position: absolute;
+    bottom: 40px;
+    right: 100px;
+    color: #FFF;
+    img{
+      width: 30px;
+    }
+  }
+}
+.confere{
+  display: none;
+  .table{
+    tr{
+      td{
+        .tam(9px);
+        line-height: 0;
+      }
+    }
+  }
+}
+.confere2{
+  display: none;
+}
+.dataTables_wrapper {
+  border: 1px solid #CCC;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+.rodape{
+  .tam(12px);
+  margin-top: 8px;
+}
+
+.list-group-item-danger {
+  color: #a94442;
+  background-color: #f2dede;
+}

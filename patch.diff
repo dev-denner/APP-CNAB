@@ -1,0 +1,277 @@
+From 8cfe91056b21f0277098bfbad61b6fee49be28cb Mon Sep 17 00:00:00 2001
+From: Denners Fernandes <denners777@hotmail.com>
+Date: Tue, 18 Feb 2014 19:30:57 -0300
+Subject: [PATCH] Final do dia 2014/02/18 19:30
+
+---
+ application/config/autoload.php       |  4 ++--
+ application/config/config.php         |  2 +-
+ application/controllers/dashboard.php |  4 ++--
+ application/controllers/login.php     | 24 +++++++++----------
+ application/core/MY_Controller.php    |  7 +++++-
+ application/models/Model_Usuario.php  | 44 ++++++++++++++++++++++++++---------
+ application/views/commom/header.php   |  8 +++----
+ application/views/login.php           |  2 +-
+ 8 files changed, 60 insertions(+), 35 deletions(-)
+
+diff --git a/application/config/autoload.php b/application/config/autoload.php
+index 675c2d2..1221000 100644
+--- a/application/config/autoload.php
++++ b/application/config/autoload.php
+@@ -64,7 +64,7 @@ $autoload['libraries'] = array('database', 'session');
+ |	$autoload['helper'] = array('url', 'file');
+ */
+ 
+-$autoload['helper'] = array('url', 'file');
++$autoload['helper'] = array('url', 'html','form','array','text', 'file');
+ 
+ 
+ /*
+@@ -109,7 +109,7 @@ $autoload['language'] = array();
+ |
+ */
+ 
+-$autoload['model'] = array();
++$autoload['model'] = array('Model_Usuario');
+ 
+ 
+ /* End of file autoload.php */
+diff --git a/application/config/config.php b/application/config/config.php
+index 777d775..30acc7f 100644
+--- a/application/config/config.php
++++ b/application/config/config.php
+@@ -14,7 +14,7 @@
+ | path to your installation.
+ |
+ */
+-$config['base_url']	= 'http://localhost:8080/CNAB/';
++$config['base_url']	= 'http://localhost/CNAB/';
+ 
+ /*
+ |--------------------------------------------------------------------------
+diff --git a/application/controllers/dashboard.php b/application/controllers/dashboard.php
+index d694817..45bd4d7 100644
+--- a/application/controllers/dashboard.php
++++ b/application/controllers/dashboard.php
+@@ -5,7 +5,7 @@ if (!defined('BASEPATH')) {
+ }
+ 
+ class Dashboard extends MY_Controller {
+-  
++
+   public function __construct() {
+     parent::__construct();
+   }
+@@ -14,4 +14,4 @@ class Dashboard extends MY_Controller {
+     $this->MY_view('dashboard', $this->data);
+   }
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/application/controllers/login.php b/application/controllers/login.php
+index e62731c..b154508 100644
+--- a/application/controllers/login.php
++++ b/application/controllers/login.php
+@@ -5,41 +5,39 @@ if (!defined('BASEPATH'))
+ 
+ class Login extends MY_Controller {
+ 
+-  private $usuario;
+-
+   public function __construct() {
+     parent::__construct();
+-    $this->usuario = $this->load->model('Model_usuario');
++    $this->load->model('Model_Usuario', 'usuario');
+     $this->load->library('form_validation');
+   }
+ 
+   public function index() {
+-    $this->load->view('login', $this->data);
+     $this->load->view('commom/alerts', $this->data);
++    $this->load->view('login', $this->data);
+   }
+ 
+   public function logar() {
+-    
++
+     if ($this->POST) {
+       if ($this->POST['login'] && !empty($this->POST['senha'])) {
+ 
+-        $criterio = array(usuario::LOGIN => $this->POST['login'], Usuario::SENHA => md5($this->POST['senha']));
+-        $usuario = $this->usuario->get($criterio);
+-
++        $criterio = array(Model_Usuario::LOGIN => $this->POST['login'], Model_Usuario::SENHA => md5($this->POST['senha']));
++        $usuario = $this->Model_Usuario->get($criterio);
++        
+         if (empty($usuario)) {
+-          $this->session->set_flashdata('ERRO', '<b>Digite seu Login e Senha</b>');
++          $this->session->set_flashdata('ERRO', '<b>Login e/ou Senha não encontradas!</b>');
+           redirect('login');
+         } else {
+-          $token = $this->usuario->setToken($usuario[0][Usuario::ID]);
++          $token = $this->Model_Usuario->setToken($usuario[0][Model_Usuario::ID]);
+           $this->session->set_userdata(parent::session_usu, $token);
+-          redirect('admin');
++          redirect('dashboard');
+         }
+       } else {
+-        $this->session->set_flashdata('ERRO', '<b>Digite seu Login e Senha</b>');
++        $this->session->set_flashdata('ERRO', '<b>Digite seu Login e Senha!</b>');
+         redirect('login');
+       }
+     } else {
+-      $this->load->view('admin/login', $data);
++      $this->load->view('login', $data);
+     }
+   }
+ 
+diff --git a/application/core/MY_Controller.php b/application/core/MY_Controller.php
+index eb5af1d..4818f21 100644
+--- a/application/core/MY_Controller.php
++++ b/application/core/MY_Controller.php
+@@ -10,10 +10,15 @@ class MY_Controller extends CI_Controller {
+ 
+   public $data = array();
+   protected $POST = NULL;
++  protected $user_info = array();
+ 
+   public function __construct() {
+     parent::__construct();
+ 
++    $this->VAR['URI'] = $this->uri->segment_array();
++    if (@$this->VAR['URI'][1] != 'login') {
++      $this->set_user_info();
++    }
+     $this->data['ERRO'] = $this->session->flashdata('ERRO');
+     $this->data['INFO'] = $this->session->flashdata('INFO');
+     $this->data['SUCESSO'] = $this->session->flashdata('SUCESSO');
+@@ -46,7 +51,7 @@ class MY_Controller extends CI_Controller {
+ 
+     $token = $this->session->userdata(self::session_usu);
+     if ($token) {
+-      $this->user_info = $this->usuario->Get($token);
++      $this->user_info = $this->Model_Usuario->get($token);
+ 
+       if (empty($this->user_info)) {
+         redirect('login');
+diff --git a/application/models/Model_Usuario.php b/application/models/Model_Usuario.php
+index 0709167..356a673 100644
+--- a/application/models/Model_Usuario.php
++++ b/application/models/Model_Usuario.php
+@@ -14,6 +14,7 @@
+ class Model_Usuario extends MY_Model {
+ 
+   const TABELA = 'USUARIO';
++  const ID = 'ID';
+   const LOGIN = 'LOGIN';
+   const SENHA = 'SENHA';
+   const NOME = 'NOME';
+@@ -23,6 +24,10 @@ class Model_Usuario extends MY_Model {
+ 
+   public function get($criterio = NULL) {
+     switch ($criterio) {
++      case is_numeric($criterio):
++        $this->getByID($criterio);
++        break;
++
+       case filter_var($criterio, FILTER_VALIDATE_EMAIL):
+         $this->getByEmail($EMAIL);
+         break;
+@@ -30,29 +35,46 @@ class Model_Usuario extends MY_Model {
+       case is_string($criterio):
+         $this->getByToken($criterio);
+         break;
++
++      case is_array($criterio):
++        $this->getByCriterio($criterio);
++        break;
+     }
+     return $this->dados;
+   }
+ 
++  private function getByID($ID) {
++    $this->db->where(self::ID, $ID);
++    $query = $this->db->get(self::TABELA);
++    $this->dados = $query->result_array();
++  }
++
+   public function setToken($ID = NULL) {
+     if (is_numeric($ID)) {
+       $this->db->where(self::ID, $ID);
+-      $TOKEN[self::TOKEN] = md5(mktime() . $ID);
+-      $this->db->update(self::TABELA, $TOKEN);
++      $token[self::TOKEN] = md5(mktime() . $ID);
++      $this->db->update(self::TABELA, $token);
+     }
+-    return $TOKEN[self::TOKEN];
++    return $token[self::TOKEN];
++  }
++
++  private function getByToken($token) {
++    $this->db->where(self::TOKEN, $token);
++    $this->db->where(self::STATUS, 1);
++    $query = $this->db->get(self::TABELA);
++    $this->dados = $query->result_array();
+   }
+ 
+-  private function getByToken($TOKEN) {
+-    $this->db->where(self::TOKEN, $TOKEN);
+-    $Query = $this->db->get(self::TABELA);
+-    $this->Dados = $Query->result_array();
++  private function getByEmail($email) {
++    $this->db->where(self::EMAIL, $email);
++    $query = $this->db->get(self::TABELA);
++    $this->dados = $query->result_array();
+   }
+ 
+-  private function getByEmail($EMAIL) {
+-    $this->db->where(self::EMAIL, $EMAIL);
+-    $Query = $this->db->get(self::TABELA);
+-    $this->Dados = $Query->result_array();
++  private function getByCriterio($criterio) {
++    $this->db->where($criterio);
++    $query = $this->db->get(self::TABELA);
++    $this->dados = $query->result_array();
+   }
+ 
+ }
+diff --git a/application/views/commom/header.php b/application/views/commom/header.php
+index d341331..2bc0f1a 100644
+--- a/application/views/commom/header.php
++++ b/application/views/commom/header.php
+@@ -43,14 +43,14 @@
+           <ul class="nav navbar-nav navbar-right">
+               <li class="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+-                  <span class="glyphicon glyphicon-user"></span> <?php //echo $_SESSION['nome']; ?> <b class="caret"></b>
++                  <span class="glyphicon glyphicon-user"></span> <?php echo $user['NOME']; ?> <b class="caret"></b>
+                 </a>
+                 <ul class="dropdown-menu">
+                   <li class="dropdown-header">INFO</li>
+                   <li class="divider"></li>
+-                  <li><a><b>E-mail:</b> <?php //echo $_SESSION['email']; ?></a></li>
+-                  <li><a><b>AD:</b> <?php //echo $_SESSION['login']; ?></a></li>
+-                  <li><a href="<?php site_url(); ?>usuario/editar"><span class="glyphicon glyphicon-lock"></span> Editar Usuario</a></li>
++                  <li><a><b>E-mail:</b> <?php echo $user['EMAIL']; ?></a></li>
++                  <li><a><b>AD:</b> <?php echo $user['LOGIN']; ?></a></li>
++                  <li><a href="<?php site_url(); ?>usuario/editar"><span class="glyphicon glyphicon-edit"></span> Editar Usuario</a></li>
+                 </ul>
+               </li>
+               <li class=""><a href="<?php site_url(); ?>login/logoff"><span class="glyphicon glyphicon-off"></span> Sair</a></li>
+diff --git a/application/views/login.php b/application/views/login.php
+index fd0a6c3..4f50e93 100644
+--- a/application/views/login.php
++++ b/application/views/login.php
+@@ -23,7 +23,7 @@
+   <body>
+     <div class="container">
+       <?php echo validation_errors(); ?>
+-      <?php echo form_open('login/login', 'class="form-signin"'); ?>
++      <?php echo form_open('login/logar', 'class="form-signin"'); ?>
+       <h1 class="form-signin-heading text-center">
+         <img src="<?php echo base_url() ?>assets/img/logo.png" title="GRUPO MPE" />
+       </h1>
+-- 
+1.8.5.2.msysgit.0
+

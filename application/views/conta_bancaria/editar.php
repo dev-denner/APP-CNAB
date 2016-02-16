@@ -63,13 +63,13 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="codempresa" class="col-sm-3 control-label">Código Empresa</label>
+        <label for="codempresa" class="col-sm-3 control-label">CNPJ</label>
         <div class="col-sm-9">
           <input type="text" class="form-control" id="codempresa" name="<?php echo Model_Conta_Bancaria::CODEMPRESA; ?>" placeholder="Código fornecido pelo banco" value="<?php echo $conta_bancaria[Model_Conta_Bancaria::CODEMPRESA]; ?>" />
         </div>
       </div>
       <div class="form-group">
-        <label for="convenio" class="col-sm-3 control-label">Convênio</label>
+        <label for="convenio" class="col-sm-3 control-label">Convênio / Cod. Empresa</label>
         <div class="col-sm-9">
           <input type="text" class="form-control" id="convenio" name="<?php echo Model_Conta_Bancaria::CONVENIO; ?>" placeholder="Código do convênio com o banco" maxlength="20" value="<?php echo $conta_bancaria[Model_Conta_Bancaria::CONVENIO]; ?>" />
         </div>

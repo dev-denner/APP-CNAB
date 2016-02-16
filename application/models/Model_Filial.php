@@ -52,4 +52,8 @@ class Model_Filial extends MY_Model {
     }
   }
 
+  public function __destruct() {
+    
+  }
+  
 }

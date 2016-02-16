@@ -26,7 +26,23 @@
             <td><?php echo $row[model_usuario::NOME] ?></td>
             <td><?php echo $row[model_usuario::EMAIL] ?></td>
             <td><?php echo $row[model_usuario::STATUS] == 1 ? 'ATIVO' : 'DESATIVADO' ?></td>
-            <td><?php echo $row[model_usuario::ACESSO] ?></td>
+            <td><?php
+              switch ($row[model_usuario::ACESSO]) {
+                case 99:
+                  echo 'Administrador Global';
+                  break;
+                case 50:
+                  echo 'Nível 5';
+                  break;
+                case 90:
+                  echo 'Administrador';
+                  break;
+
+                default:
+                  echo 'Nível 1';
+                  break;
+              }
+              ?></td>
             <td>
               <?php if ($row[model_usuario::STATUS] == 1): ?>
                 <div class="btn-group">

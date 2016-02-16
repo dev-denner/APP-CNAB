@@ -134,7 +134,7 @@ class cnab240 extends MY_Model {
     $linha .= str_pad($this->numInscricaoEmpresa, 14, '0', STR_PAD_LEFT);
     $linha .= str_pad($this->codConvenioNoBanco, 20, ' ', STR_PAD_LEFT);
     $linha .= str_pad($this->agenciaEmpresa, 5, '0', STR_PAD_LEFT);
-    $linha .= substr($this->digAgenciaEmpresa, 0, 1);
+    $linha .= substr(str_pad($this->digAgenciaEmpresa, 1, ' ', STR_PAD_LEFT), 0, 1);
     $linha .= str_pad($this->contaEmpresa, 12, '0', STR_PAD_LEFT);
     $linha .= substr($this->digContaEmpresa, 0, 1);
     $linha .= substr($this->digAgenciaContaEmpresa, 0, 1);
@@ -165,9 +165,9 @@ class cnab240 extends MY_Model {
     $linha .= ' ';
     $linha .= substr($this->tipoInscricaoEmpresa, 0, 1);
     $linha .= substr(str_pad($this->numInscricaoEmpresa, 14, '0', STR_PAD_LEFT), 0, 14);
-    $linha .= substr(str_pad($this->codConvenioNoBanco, 20, '0', STR_PAD_LEFT), 0, 20);
+    $linha .= substr(str_pad($this->codConvenioNoBanco, 20, ' ', STR_PAD_LEFT), 0, 20);
     $linha .= substr(str_pad($this->agenciaEmpresa, 5, '0', STR_PAD_LEFT), 0, 5);
-    $linha .= substr($this->digAgenciaEmpresa, 0, 1);
+    $linha .= substr(str_pad($this->digAgenciaEmpresa, 1, ' ', STR_PAD_LEFT), 0, 1);
     $linha .= substr(str_pad($this->contaEmpresa, 12, '0', STR_PAD_LEFT), 0, 12);
     $linha .= substr($this->digContaEmpresa, 0, 1);
     $linha .= substr($this->digAgenciaContaEmpresa, 0, 1);
@@ -204,7 +204,7 @@ class cnab240 extends MY_Model {
     $linha .= substr($this->digContaFavorecido, 0, 1);
     $linha .= substr($this->digAgenciaContaFavorecido, 0, 1);
     $linha .= substr(str_pad($this->nomeFavorecido, 30, ' ', STR_PAD_RIGHT), 0, 30);
-    $linha .= substr(str_pad($this->numDocEmpresa, 20, ' ', STR_PAD_LEFT), 0, 20); //verificar se pode ser a chapa do funcionario
+    $linha .= substr(str_pad($this->numDocEmpresa, 20, ' ', STR_PAD_RIGHT), 0, 20); //verificar se pode ser a chapa do funcionario
     $linha .= substr(str_pad($this->dataPagto, 8, ' ', STR_PAD_RIGHT), 0, 8);
     $linha .= substr(str_pad($this->tipoMoeda, 3, ' ', STR_PAD_RIGHT), 0, 3);
     $linha .= substr(str_pad($this->qtdMoeda, 15, '0', STR_PAD_LEFT), 0, 15);
@@ -251,6 +251,10 @@ class cnab240 extends MY_Model {
     $linha .= str_pad('', 205, ' ', STR_PAD_LEFT);
 
     return $linha;
+  }
+
+  public function __destruct() {
+    
   }
 
 }

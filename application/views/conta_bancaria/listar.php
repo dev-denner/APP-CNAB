@@ -15,7 +15,7 @@
           <th>AGÊNCIA DIG</th>
           <th>CONTA DIG</th>
           <th>RAZÃO CC</th>
-          <th>CÓDIGO BANCO</th>
+          <th>CNPJ</th>
           <th width="100">AÇÕES</th>
         </tr>
       </thead>

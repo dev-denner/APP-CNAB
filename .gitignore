@@ -8,9 +8,18 @@ application/logs/*
 !application/logs/index.html
 !application/logs/.htaccess
 
-*/config/development
-*/logs/log-*.php
-*/logs/!index.html
-*/cache/*
-*/cache/!index.html
-*/cache/!.htaccess
+arquivos/
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+.nb-gradle/
+
+### Composer ###
+composer.phar
+vendor/

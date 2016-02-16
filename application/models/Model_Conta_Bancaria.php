@@ -60,4 +60,8 @@ class Model_Conta_Bancaria extends MY_Model {
     }
   }
 
+  public function __destruct() {
+    
+  }
+  
 }

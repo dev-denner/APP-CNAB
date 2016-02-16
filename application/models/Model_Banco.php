@@ -22,5 +22,8 @@ class Model_Banco extends MY_Model {
     parent::__construct();
   }
 
+  public function __destruct() {
+    
+  }
 
 }

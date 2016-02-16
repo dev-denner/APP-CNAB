@@ -29,6 +29,8 @@ class Model_Base_Processo extends MY_Model {
   const PERIODO = 'CD_PERIODO_PAGTO';
   const SITUACAO = 'DS_SITUACAO';
   const CPF = 'CD_CPF';
+  const FILIAL = 'CD_FILIAL';
+  const DT_REAL = 'DT_REAL_PAGTO';
 
   public function __construct() {
     parent::__construct();
@@ -63,5 +65,77 @@ class Model_Base_Processo extends MY_Model {
       throw new Exception('Não há registros.');
     }
   }
-  
+
+  public function getBaixarPagto($ID) {
+    $query = $this->db->query('SELECT BP.' . self::ID . ', BP.' . self::CHAPA . ', BP.' . self::NOME . ', 
+                                      BP.' . self::VALOR . ', BP.' . self::CPF . ', BP.' . self::PROCESSO . ', 
+                                      TO_CHAR(BP.' . self::DT_REAL . ', \'DD/MM/YYYY\') ' . self::DT_REAL . '
+                               FROM ' . self::TABELA . ' BP
+                               INNER JOIN ' . Model_Log::TABELA . ' AR
+                                 ON AR.' . Model_Log::PROCESSO . ' = BP.' . self::PROCESSO . ' 
+                                AND BP.' . self::BANCO . ' = AR.' . Model_Log::BANCO . '
+                               WHERE ' . Model_Log::ID . '  = ' . $ID);
+
+    if ($query) {
+      return $query->result_array();
+    } else {
+      throw new Exception('Não há registros.');
+    }
+  }
+
+  public function getBaixarPagtoTotal($ID) {
+    $query = $this->db->query('SELECT SUM(' . self::VALOR . ') VALOR
+                               FROM ' . self::TABELA . ' BP
+                               INNER JOIN ' . Model_Log::TABELA . ' AR
+                                 ON AR.' . Model_Log::PROCESSO . ' = BP.' . self::PROCESSO . ' 
+                                AND BP.' . self::BANCO . ' = AR.' . Model_Log::BANCO . '
+                               WHERE ' . Model_Log::ID . '  = ' . $ID . '
+                                AND BP.' . self::DT_REAL . ' IS NOT NULL');
+
+    if ($query->num_rows() > 0) {
+      return $query->row_array();
+    } else {
+      throw new Exception('Não há registros.');
+    }
+  }
+
+  public function desfazerBaixa($ID) {
+    $query = $this->db->query('UPDATE ' . self::TABELA . ' SET ' . self::DT_REAL . ' = null
+                               WHERE ' . self::ID . ' IN(SELECT BP.' . self::ID . '
+                               FROM ' . self::TABELA . ' BP
+                               INNER JOIN ' . Model_Log::TABELA . ' AR
+                                 ON AR.' . Model_Log::PROCESSO . ' = BP.' . self::PROCESSO . ' 
+                                AND BP.' . self::BANCO . ' = AR.' . Model_Log::BANCO . '
+                               WHERE ' . Model_Log::ID . '  = ' . $ID . ')');
+
+    if ($query) {
+      return true;
+    }
+    return false;
+  }
+
+  public function setBaixarPagto($dados = array()) {
+    
+    if (!empty($dados['baixar'])) {
+      $idsBp = $dados['baixar'];
+      $data = empty($dados['baixar_data']) ? date('Y-m-d') : $dados['baixar_data'];
+
+      foreach ($idsBp as $key => $value) {
+        $query = $this->db->query(
+                'UPDATE ' . self::TABELA . ' SET ' . self::DT_REAL . ' = TO_DATE(\'' . $data . '\', \'YYYY-MM-DD\')
+                 WHERE ' . self::ID . ' = ' . $value);
+
+        if (!$query) {
+          throw new Exception('Erro ao realizar conciliação da Base de Processo de id ' . $value);
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public function __destruct() {
+    
+  }
+
 }

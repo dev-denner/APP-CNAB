@@ -60,7 +60,7 @@ class funcionario extends MY_Controller {
       $dados = $this->readXLS($xls['extension'], $file);
 
       $this->validaFuncionario($dados);
-      
+
       redirect('funcionario');
     } catch (Exception $exc) {
       $this->session->set_flashdata('ERRO', $exc->getMessage());
@@ -118,7 +118,7 @@ class funcionario extends MY_Controller {
 
   private function readXLS($ext, $file) {
 
-    $this->load->library('phpexcel');
+    $this->load->library('PHPExcel');
 
     $inputFileName = $file;
 
@@ -157,23 +157,18 @@ class funcionario extends MY_Controller {
 
       if ($value['A'] != 'CHAPA' && !is_null($value['A'])) {
         $chapa = isset($value['A']) ? str_pad((int) $value['A'], 6, "0", STR_PAD_LEFT) : '';
-        $nome = str_replace('\'', '', $value['B']);
+        $nome = trim(str_replace('\'', '', $value['B']));
         $eo = str_pad($value['C'], 6, "0", STR_PAD_LEFT);
         $banco = $value['D'];
         $agencia = $value['E'];
         $agenciadig = $value['F'];
 
         settype($value['G'], 'string');
-        $value['G'] = trim($value['G']);
+        $value['G'] = trim(str_replace('-', '', $value['G']));
+
         if (!is_null($value['G']) && isset($value['G'][1])) {
-          $aux = explode('-', $value['G']);
-          if (isset($aux[1])) {
-            $conta = $aux[0];
-            $contadig = $aux[1];
-          } else {
-            $conta = substr($value['G'], 0, -1);
-            $contadig = substr($value['G'], -1, 1);
-          }
+          $conta = substr($value['G'], 0, -1);
+          $contadig = substr($value['G'], -1, 1);
         } else {
           $flagConta = TRUE;
         }
@@ -223,9 +218,9 @@ class funcionario extends MY_Controller {
                   array(
                       Model_Funcionario::EMPRESA => $coligada,
                       Model_Funcionario::CPF => $cpf,
+                      Model_Funcionario::CHAPA => $chapa,
                   )
           );
-          //var_dump($dado); exit;
           if (empty($info)) {
             $dado[Model_Funcionario::ID] = $this->Model_Funcionario->autoincrement();
             settype($dado[Model_Funcionario::ID], 'int');
@@ -233,7 +228,8 @@ class funcionario extends MY_Controller {
           } else {
             $acao = $this->Model_Funcionario->save($dado, array(
                 Model_Funcionario::EMPRESA => $coligada,
-                Model_Funcionario::CPF => $cpf
+                Model_Funcionario::CPF => $cpf,
+                Model_Funcionario::CHAPA => $chapa,
                     )
             );
           }
@@ -245,6 +241,7 @@ class funcionario extends MY_Controller {
       }
     }
     if (!is_null($this->msgError)) {
+      echo $this->msgError, exit;
       $this->session->set_flashdata('ERRO', $this->msgError);
     } else {
       $this->session->set_flashdata('SUCESSO', 'Funcionários importados com sucesso.');

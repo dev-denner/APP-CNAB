@@ -70,25 +70,5 @@ $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 
-
-$host2 = '(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.2)(PORT = 1521))
-    (CONNECT_DATA = (SERVER = DEDICATED) (SERVICE_NAME = RM)))';
-
-$db['rm']['hostname'] = $host2;
-$db['rm']['username'] = 'USR_PRODUCAO_KKJNQQ';
-$db['rm']['password'] = 'F3n8#21C';
-$db['rm']['database'] = '';
-$db['rm']['dbdriver'] = 'oci8';
-$db['rm']['dbprefix'] = '';
-$db['rm']['pconnect'] = TRUE;
-$db['rm']['db_debug'] = TRUE;
-$db['rm']['cache_on'] = FALSE;
-$db['rm']['cachedir'] = '';
-$db['rm']['char_set'] = 'utf8';
-$db['rm']['dbcollat'] = 'utf8_general_ci';
-$db['rm']['swap_pre'] = '';
-$db['rm']['autoinit'] = TRUE;
-$db['rm']['stricton'] = FALSE;
-
 /* End of file database.php */
 /* Location: ./application/config/database.php */

@@ -28,11 +28,11 @@ class Model_Cnab_Novo extends MY_Model {
 
     try {
 
-      $this->db->select('BP.' . Model_Base_Processo::CCUSTO . ', SUM(BP.' . Model_Base_Processo::VALOR . ')' . Model_Base_Processo::VALOR);
+      $this->db->select('BP.' . Model_Base_Processo::CCUSTO . ', BP.' . Model_Base_Processo::FILIAL . ', SUM(BP.' . Model_Base_Processo::VALOR . ')' . Model_Base_Processo::VALOR);
       $this->db->where($criterio);
       $this->db->join(Model_Banco::TABELA . ' BA', 'BA.' . Model_Banco::ID . ' = CN.' . self::BANCO);
       $this->db->join(Model_Base_Processo::TABELA . ' BP', 'BP.' . Model_Base_Processo::ID . ' = CN.' . self::BASE);
-      $this->db->group_by('BP.' . Model_Base_Processo::CCUSTO);
+      $this->db->group_by('BP.' . Model_Base_Processo::CCUSTO . ', BP.' . Model_Base_Processo::FILIAL);
       $query = $this->db->get(self::TABELA . ' CN');
       if ($query) {
         return $query->result_array();
@@ -42,6 +42,10 @@ class Model_Cnab_Novo extends MY_Model {
     } catch (Exception $exc) {
       return $exc->getMessage();
     }
+  }
+
+  public function __destruct() {
+    
   }
 
 }

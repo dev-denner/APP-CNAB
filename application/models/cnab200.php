@@ -122,4 +122,8 @@ class cnab200 extends MY_Model {
     return $linha;
   }
 
+  public function __destruct() {
+    
+  }
+  
 }

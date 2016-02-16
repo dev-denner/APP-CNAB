@@ -41,4 +41,8 @@ class Model_Lancamento_Financeiro extends MY_Model {
     parent::__construct();
   }
 
+  public function __destruct() {
+    
+  }
+  
 }

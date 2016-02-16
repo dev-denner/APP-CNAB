@@ -9,8 +9,11 @@
     <table class="table table-striped table-bordered table-hover table-condensed datatable">
       <thead>
         <tr>
-          <th width="30">ID</th>
+          <th>ID</th>
           <th>NOME</th>
+          <th>NATUREZA</th>
+          <th>TIPO</th>
+          <th>PERIODO</th>
           <th width="100">AÇÕES</th>
         </tr>
       </thead>
@@ -19,6 +22,9 @@
           <tr>
             <td><?php echo $row[Model_Tipo_Operacao::ID] ?></td>
             <td><?php echo $row[Model_Tipo_Operacao::NOME] ?></td>
+            <td><?php echo $row[Model_Tipo_Operacao::NATUREZA] ?></td>
+            <td><?php echo $row[Model_Tipo_Operacao::TIPO] ?></td>
+            <td><?php echo $row[Model_Tipo_Operacao::PERIODO] ?></td>
             <td>
               <div class="btn-group">
                 <a href="<?php echo site_url(); ?>tipo_operacao/editar/<?php echo $row[Model_Tipo_Operacao::ID]; ?>" class="btn btn-primary">

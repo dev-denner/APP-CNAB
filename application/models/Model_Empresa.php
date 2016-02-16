@@ -20,9 +20,12 @@ class Model_Empresa extends MY_Model {
   const FANTASIA = 'DS_NOME_FANTASIA';
   const CODERP = 'CD_COD_PROTHEUS';
   const LOJA = 'CD_LOJA_PROTHEUS';
-  
+
   public function __construct() {
     parent::__construct();
+  }
+
+  public function __destruct() {
   }
 
 }

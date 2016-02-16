@@ -276,10 +276,10 @@ class MY_Model extends CI_Model {
   public function getSequence() {
     try {
 
-      $query = $this->db->query('SELECT SEQUENCE1.NEXTVAL FROM DUAL');
+      $query = $this->db->query('SELECT SEQUENCE1.NEXTVAL ID FROM DUAL');
 
       if (!empty($query)) {
-        return $query->result_array()[0]['NEXTVAL'];
+        return $query->result_array()[0]['ID'];
       } else {
         throw new Exception('Erro ao processar autoincrement.');
       }

@@ -5,8 +5,9 @@
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title></title>
+    <title>APP-CNAB - Grupo MPE</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/main.css">
@@ -46,20 +47,25 @@
                 <i class="fa fa-money"></i> CNAB <b class="caret"></b>
               </a>
               <ul class="dropdown-menu">
-                <li class="<?php echo isset($menu_cnab_gerar) ? $menu_cnab_gerar : ''; ?>">
-                  <a href="<?php echo site_url(); ?>cnab">Gerar</a>
-                </li>
+                <?php if ($user['NU_PRIVILEGIO'] >= 50): ?>
+                  <li class="<?php echo isset($menu_cnab_gerar) ? $menu_cnab_gerar : ''; ?>">
+                    <a href="<?php echo site_url(); ?>cnab">Gerar</a>
+                  </li>
+                <?php endif; ?>
                 <li class="<?php echo isset($menu_cnab_validar) ? $menu_cnab_validar : ''; ?>">
-                  <a href="<?php echo site_url(); ?>cnab/validar">Validar</a>
+                  <a href="<?php echo site_url(); ?>cnab/validar">Validar Planilha</a>
+                </li>
+                <li class="<?php echo isset($menu_cnab_consultar) ? $menu_cnab_consultar : ''; ?>">
+                  <a href="<?php echo site_url(); ?>cnab/consultar">Consultar</a>
                 </li>
               </ul>
             </li>
-            <li class="dropdown <?php echo isset($menu_admin) ? $menu_admin : ''; ?>">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                <span class="glyphicon glyphicon-wrench"></span> Admin <b class="caret"></b>
-              </a>
-              <ul class="dropdown-menu">
-                <?php if ($user['NU_PRIVILEGIO'] >= 90): ?>
+            <?php if ($user['NU_PRIVILEGIO'] >= 90): ?>
+              <li class="dropdown <?php echo isset($menu_admin) ? $menu_admin : ''; ?>">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <span class="glyphicon glyphicon-wrench"></span> Admin <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
                   <li class="<?php echo isset($menu_empresa) ? $menu_empresa : ''; ?>">
                     <a href="<?php echo site_url(); ?>empresa">Empresa</a>
                   </li>
@@ -73,18 +79,38 @@
                     <a href="<?php echo site_url(); ?>conta_bancaria">Conta Bancária</a>
                   </li>
                   <li class="<?php echo isset($menu_tipo_operacao) ? $menu_tipo_operacao : ''; ?>">
-                    <a href="<?php echo site_url(); ?>tipo_operacao">Tipo de Operação</a>
+                    <a href="<?php echo site_url(); ?>tipo_operacao">Tipo de Pagamento</a>
                   </li>
                   <li role="presentation" class="divider"></li>
-                  <li class="<?php echo isset($menu_usuario) ? $menu_usuario : ''; ?>">
-                    <a href="<?php echo site_url(); ?>usuario">Usuários</a>
+                  <li class="<?php echo isset($menu_funcionario) ? $menu_funcionario : ''; ?>">
+                    <a href="<?php echo site_url(); ?>funcionario">Funcionário</a>
                   </li>
-                <?php endif; ?>
-                <li class="<?php echo isset($menu_funcionario) ? $menu_funcionario : ''; ?>">
-                  <a href="<?php echo site_url(); ?>funcionario">Funcionário</a>
-                </li>
-              </ul>
-            </li>
+                  <?php if ($user['NU_PRIVILEGIO'] > 90): ?>
+                    <li class="<?php echo isset($menu_usuario) ? $menu_usuario : ''; ?>">
+                      <a href="<?php echo site_url(); ?>usuario">Usuários</a>
+                    </li>
+                  <?php endif; ?>
+                </ul>
+              </li>
+            <?php endif; ?>
+            <?php if ($user['NU_PRIVILEGIO'] >= 50): ?>
+              <li class="dropdown <?php echo isset($menu_relatorio) ? $menu_relatorio : ''; ?>">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <span class="fa fa-file-text"></span> Relatórios <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="<?php echo isset($menu_arquivos) ? $menu_arquivos : ''; ?>">
+                    <a href="<?php echo site_url('relatorio/arquivos'); ?>">Arquivos</a>
+                  </li>
+                  <li class="<?php echo isset($menu_liquido_folha) ? $menu_liquido_folha : ''; ?>">
+                    <a href="<?php echo site_url('relatorio/liquido_folha'); ?>">Líquido de Folha</a>
+                  </li>
+                  <li class="<?php echo isset($menu_controle_pagamento) ? $menu_controle_pagamento : ''; ?>">
+                    <a href="<?php echo site_url('relatorio/controle_pagamento'); ?>">Controle de Pagamento</a>
+                  </li>
+                </ul>
+              </li>
+            <?php endif; ?>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
@@ -96,7 +122,12 @@
                 <li class="divider"></li>
                 <li><a><b>E-mail:</b> <?php echo $user[Model_Usuario::EMAIL]; ?></a></li>
                 <li><a><b>AD:</b> <?php echo $user[Model_Usuario::LOGIN]; ?></a></li>
-                <li><a href="<?php echo site_url(); ?>usuario/editar/<?php echo $user[Model_Usuario::ID]; ?>"><span class="glyphicon glyphicon-edit"></span> Editar Usuario</a></li>
+                <li>
+                  <form action="<?php echo site_url('usuario/editarUsuario'); ?>" method="POST">
+                    <input type="hidden" value="<?php echo $user[Model_Usuario::ID]; ?>" name="id" />
+                    <button class="btn" type="submit"><span class="glyphicon glyphicon-edit"></span> Editar Usuario</button>
+                  </form>
+                </li>
               </ul>
             </li>
             <li class=""><a href="<?php echo site_url(); ?>login/logoff"><span class="glyphicon glyphicon-off"></span> Sair</a></li>

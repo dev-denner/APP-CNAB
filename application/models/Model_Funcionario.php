@@ -39,9 +39,9 @@ class Model_Funcionario extends MY_Model {
 
   public function getFilialRM($coligada, $cpf) {
 
-    $query = $this->RM->query('SELECT PF.CODFILIAL ' . self::FILIAL . '
+    $query = $this->RM->query('SELECT PF.CODFILIAL ' . self::FILIAL . ', PF.CODSITUACAO ' . self::SITUACAO . '
                          FROM RM.PFUNC PF
-                         LEFT JOIN RM.PPESSOA PP
+                         INNER JOIN RM.PPESSOA PP
                             ON PP.CODIGO = PF.CODPESSOA
                          WHERE PP.CPF = \'' . $cpf . '\'
                            AND PF.CODCOLIGADA = ' . $coligada
@@ -56,17 +56,18 @@ class Model_Funcionario extends MY_Model {
 
   public function getFuncionariosRM($coligada, $chapa, $cpf) {
 
-    $query = $this->RM->query('SELECT PF.CODCOLIGADA ' . self::EMPRESA . ' , 
-                                PF.CHAPA ' . self::CHAPA . ', 
+    $query = $this->RM->query('SELECT PF.CODCOLIGADA ' . self::EMPRESA . ' ,
+                                PF.CHAPA ' . self::CHAPA . ',
                                 PF.NOME ' . self::NOME . ',
                                 PF.CODBANCOPAGTO ' . self::BANCO . ',
-                                PF.CODAGENCIAPAGTO ' . self::AGENCIA . ', 
-                                GA.DIGAG ' . self::DIGITOAG . ', 
-                                PF.CONTAPAGAMENTO ' . self::CONTA . ',
+                                PF.CODAGENCIAPAGTO ' . self::AGENCIA . ',
+                                GA.DIGAG ' . self::DIGITOAG . ',
+                                REPLACE(REPLACE(PF.CONTAPAGAMENTO, \'.\'), \'-\') ' . self::CONTA . ',
                                 PF.CODSECAO ' . self::SECAO . ',
                                 PC.CODCCUSTO ' . self::CCUSTO . ',
                                 ST.DESCRICAO ' . self::SITUACAO . ',
                                 CR.DESCRICAO ' . self::PERIODO . ',
+                                PF.CODFILIAL ' . self::FILIAL . ',
                                 REGEXP_REPLACE(LPAD(PP.CPF, 11, \'0\'), \'([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})\',\'\1.\2.\3-\4\') ' . self::CPF . '
                          FROM RM.PFUNC PF
                          LEFT JOIN RM.PCODSITUACAO ST
@@ -88,7 +89,6 @@ class Model_Funcionario extends MY_Model {
                            AND PP.CPF = \'' . $cpf . '\'
                            AND PF.CODCOLIGADA = ' . $coligada
     );
-
     if ($query->num_rows > 0) {
       return $query->result_array();
     } else {
@@ -126,22 +126,53 @@ class Model_Funcionario extends MY_Model {
     }
   }
 
-  public function getForExcel($banco, $agencia, $digAgencia = NULL, $conta, $digConta = NULL) {
+  public function getForExcel($chapa, $banco, $agencia, $digAgencia = NULL, $conta, $digConta = NULL, $cpf) {
 
-    $RM = $this->load->database('rm', TRUE);
+    if (!is_null($cpf)) {
+      $query = $this->RM->query('SELECT PF.CHAPA ' . self::CHAPA . ',
+                                PF.NOME ' . self::NOME . ',
+                                PF.CODSITUACAO ' . self::SITUACAO . ',
+                                REGEXP_REPLACE(LPAD(PP.CPF, 11, \'0\'), \'([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})\',\'\1.\2.\3-\4\') ' . self::CPF . '
+                         FROM RM.PFUNC PF
+                         LEFT JOIN RM.PPESSOA PP
+                            ON PP.CODIGO = PF.CODPESSOA
+                         WHERE PP.CPF = \'' . $cpf . '\''
+      );
+      if ($query->num_rows > 0) {
+        return $query->result_array();
+      }
+    }
+    if (!is_null($chapa)) {
 
-    if (!is_null($digAgencia)) {
-      $dig = ' AND GA.DIGAG = \'' . $digAgencia . '\'';
-    } else {
+      $query = $this->RM->query('SELECT PF.CHAPA ' . self::CHAPA . ',
+                                PF.NOME ' . self::NOME . ',
+                                PF.CODSITUACAO ' . self::SITUACAO . ',
+                                REGEXP_REPLACE(LPAD(PP.CPF, 11, \'0\'), \'([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})\',\'\1.\2.\3-\4\') ' . self::CPF . '
+                         FROM RM.PFUNC PF
+                         LEFT JOIN RM.PPESSOA PP
+                            ON PP.CODIGO = PF.CODPESSOA
+                         WHERE PF.CHAPA = \'' . $chapa . '\''
+      );
+      if ($query->num_rows > 0) {
+        return $query->result_array();
+      }
+    }
+
+    if (is_null($digAgencia)) {
       $dig = '';
+    } else {
+      $dig = ' AND GA.DIGAG = \'' . $digAgencia . '\'';
     }
 
     if (is_null($digConta)) {
       $digC = '';
+    } else {
+      $digC = ' AND SUBSTR(TRIM(PF.CONTAPAGAMENTO), -1, 1) = \'' . $digConta . '\'';
     }
 
-    $query = $RM->query('SELECT PF.CHAPA ' . self::CHAPA . ', 
+    $query = $this->RM->query('SELECT PF.CHAPA ' . self::CHAPA . ',
                                 PF.NOME ' . self::NOME . ',
+                                PF.CODSITUACAO ' . self::SITUACAO . ',
                                 REGEXP_REPLACE(LPAD(PP.CPF, 11, \'0\'), \'([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})\',\'\1.\2.\3-\4\') ' . self::CPF . '
                          FROM RM.PFUNC PF
                          LEFT JOIN RM.PPESSOA PP
@@ -149,18 +180,79 @@ class Model_Funcionario extends MY_Model {
                          LEFT JOIN RM.GAGENCIA GA
                             ON PF.CODBANCOPAGTO    = GA.NUMBANCO
                             AND PF.CODAGENCIAPAGTO = GA.NUMAGENCIA
-                         WHERE PF.CODBANCOPAGTO = \'' . $banco . '\' 
-                           AND PF.CODAGENCIAPAGTO = ' . $agencia . '
-                           ' . $dig . ' 
-                           AND (PF.CONTAPAGAMENTO LIKE \'%' . $conta . $digC . '%\' 
-                              OR PF.CONTAPAGAMENTO LIKE \'%' . $conta . '-' . $digC . '%\')'
+                         WHERE PF.CODBANCOPAGTO = ' . $banco . '
+                           AND PF.CODAGENCIAPAGTO = \'' . $agencia . '\'
+                           ' . $dig . $digC . '
+                           AND TO_NUMBER(
+                              SUBSTR(
+                              REPLACE(
+                                REPLACE(
+                                  TRIM(PF.CONTAPAGAMENTO)
+                                , \'-\', \'\')
+                              , \'.\', \'\'), 1,
+                                  LENGTH(
+                                    REPLACE(
+                                      REPLACE(
+                                        TRIM(PF.CONTAPAGAMENTO)
+                                      , \'-\', \'\')
+                                    , \'.\', \'\')
+                                  ) - 1
+                                )
+                              )  = ' . $conta
     );
 
     if ($query->num_rows > 0) {
       return $query->result_array();
-    } else {
-      return $banco . ' - ' . $agencia . ' - ' . $digAgencia . ' - ' . $conta . ' - ' . $digConta;
     }
+
+    if (is_null($digConta)) {
+      $digC = '';
+    } else {
+      $digC = ' AND SUBSTR(TRIM(FH.CONTAPGTO), -1, 1) = \'' . $digConta . '\'';
+    }
+
+    $query = $this->RM->query('SELECT PF.CHAPA ' . self::CHAPA . ',
+                                PF.NOME ' . self::NOME . ',
+                                PF.CODSITUACAO ' . self::SITUACAO . ',
+                                REGEXP_REPLACE(LPAD(PP.CPF, 11, \'0\'), \'([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})\',\'\1.\2.\3-\4\') ' . self::CPF . '
+                         FROM RM.PFUNC PF
+                         LEFT JOIN RM.PPESSOA PP
+                            ON PP.CODIGO = PF.CODPESSOA
+                         LEFT JOIN RM.PFHSTCPGTO FH
+                            ON FH.CODCOLIGADA = PF.CODCOLIGADA
+                            AND FH.CHAPA = PF.CHAPA
+                         LEFT JOIN RM.GAGENCIA GA
+                            ON GA.NUMBANCO = FH.CODBANCOPGTO
+                            AND GA.NUMAGENCIA = FH.CODAGENCIAPGTO
+                         WHERE FH.CODBANCOPGTO = ' . $banco . '
+                           AND FH.CODAGENCIAPGTO = \'' . $agencia . '\'
+                           ' . $dig . $digC . '
+                           AND TO_NUMBER(
+                              SUBSTR(
+                              REPLACE(
+                                REPLACE(
+                                  TRIM(FH.CONTAPGTO)
+                                , \'-\', \'\')
+                              , \'.\', \'\'), 1,
+                                  LENGTH(
+                                    REPLACE(
+                                      REPLACE(
+                                        TRIM(FH.CONTAPGTO)
+                                      , \'-\', \'\')
+                                    , \'.\', \'\')
+                                  ) - 1
+                                )
+                              )  = ' . $conta
+    );
+    if ($query->num_rows > 0) {
+      return $query->result_array();
+    } else {
+      return NULL;
+    }
+  }
+
+  public function __destruct() {
+    
   }
 
 }

@@ -37,7 +37,8 @@
         <div class="col-sm-9">
           <select class="form-control" id="acesso" name="<?php echo model_usuario::ACESSO; ?>" required >
             <option value="">Acessar o sistema como</option>
-            <option value="1">Usuario</option>
+            <option value="1">Nível 1</option>
+            <option value="50">Nível 5</option>
             <option value="90">Administrador</option>
             <option value="99">Administrador Global</option>
           </select>

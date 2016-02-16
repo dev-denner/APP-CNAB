@@ -15,6 +15,8 @@ class MY_Controller extends CI_Controller {
   public function __construct() {
     parent::__construct();
 
+    date_default_timezone_set('America/Sao_Paulo');
+
     $this->VAR['URI'] = $this->uri->segment_array();
     if (@$this->VAR['URI'][1] != 'login') {
       $this->set_user_info();
@@ -69,7 +71,7 @@ class MY_Controller extends CI_Controller {
     $mig = '';
     if (is_array($migalhas)) {
       for ($i = 0; $i < count($migalhas) - 1; $i++) {
-        if ($migalhas[$i] == 'Admin') {
+        if ($migalhas[$i] == 'Admin' || $migalhas[$i] == 'Relatório') {
           $retorno .= '<li>' . $migalhas[$i] . '</li>';
         } else {
 
@@ -97,6 +99,37 @@ class MY_Controller extends CI_Controller {
       $retorno .= '<li class="active">' . $migalhas . '</li></ol>';
     }
     return $retorno;
+  }
+
+  function create_breadcrumb() {
+    $ci = &get_instance();
+    $i = 1;
+    $uri = $ci->uri->segment($i);
+    $link = '<ol class="breadcrumb">';
+
+    while ($uri != '') {
+      $prep_link = '';
+      for ($j = 1; $j <= $i; $j++) {
+        $prep_link .= $ci->uri->segment($j) . '/';
+      }
+
+      if ($ci->uri->segment($i + 1) == '') {
+        $link.='<li>»<a href="' . site_url($prep_link) . '"><b>';
+        $link.=$ci->uri->segment($i) . '</b></a></li> ';
+      } else {
+        $link.='<li>» <a href="' . site_url($prep_link) . '">';
+        $link.=$ci->uri->segment($i) . '</a></li> ';
+      }
+
+      $i++;
+      $uri = $ci->uri->segment($i);
+    }
+    $link .= '</ol>';
+    return $link;
+  }
+
+  public function __destruct() {
+    
   }
 
 }

@@ -82,4 +82,8 @@ class model_usuario extends MY_Model {
     $this->dados = $query->result_array();
   }
 
+  public function __destruct() {
+    
+  }
+  
 }

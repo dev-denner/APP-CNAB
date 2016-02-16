@@ -25,4 +25,8 @@ class Model_Folha extends MY_Model {
     parent::__construct();
   }
 
+  public function __destruct() {
+    
+  }
+  
 }

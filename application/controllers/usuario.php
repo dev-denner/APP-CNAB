@@ -50,7 +50,7 @@ class Usuario extends MY_Controller {
     }
   }
 
-  private function validar($pula_login = FALSE) {
+  private function validar($pula_login = FALSE, $pula_senha = FALSE) {
     if (!$pula_login) {
       if (empty($this->POST[model_usuario::LOGIN])) {
         throw new Exception('Campo <b>Login</b> não pode ficar vazio.');
@@ -58,21 +58,23 @@ class Usuario extends MY_Controller {
       if (isset($this->Model_Usuario->get(array(model_usuario::LOGIN => $this->POST[model_usuario::LOGIN]))[0])) {
         throw new Exception('O usuário digitado já está cadastrado. Digite outro usuario.');
       }
+      if (empty($this->POST[model_usuario::ACESSO])) {
+        throw new Exception('Escolha como este usuário acessará o sistema.');
+      }
     }
-    if (empty($this->POST[model_usuario::SENHA])) {
-      throw new Exception('Campo <b>Senha</b> não pode ficar vazio.');
-    }
-    if ($this->POST[model_usuario::SENHA] != $this->POST['confirm_senha']) {
-      throw new Exception('Senhas não conferem. Digite duas senhas iguais');
+    if (!$pula_senha) {
+      if (empty($this->POST[model_usuario::SENHA])) {
+        throw new Exception('Campo <b>Senha</b> não pode ficar vazio.');
+      }
+      if ($this->POST[model_usuario::SENHA] != $this->POST['confirm_senha']) {
+        throw new Exception('Senhas não conferem. Digite duas senhas iguais');
+      }
     }
     if (empty($this->POST[model_usuario::NOME])) {
       throw new Exception('Campo <b>Nome</b> não pode ficar vazio.');
     }
     if (empty($this->POST[model_usuario::EMAIL])) {
       throw new Exception('Campo <b>E-mail</b> não pode ficar vazio.');
-    }
-    if (empty($this->POST[model_usuario::ACESSO])) {
-      throw new Exception('Escolha como este usuário acessará o sistema.');
     }
   }
 
@@ -86,11 +88,19 @@ class Usuario extends MY_Controller {
 
   public function atualizar() {
     try {
-      $this->validar(TRUE);
-      $campos = array(model_usuario::SENHA, model_usuario::NOME, model_usuario::EMAIL, model_usuario::ACESSO);
+
+      if (empty($this->POST[model_usuario::SENHA])) {
+        $this->validar(TRUE, TRUE);
+        $campos = array(model_usuario::NOME, model_usuario::EMAIL, model_usuario::ACESSO);
+      } else {
+        $this->validar(TRUE);
+        $this->POST[model_usuario::SENHA] = md5($this->POST[model_usuario::SENHA]);
+        $campos = array(model_usuario::SENHA, model_usuario::NOME, model_usuario::EMAIL, model_usuario::ACESSO);
+      }
+
       $dados = elements($campos, $this->POST);
       settype($dados[model_usuario::ACESSO], 'integer');
-      $dados[model_usuario::SENHA] = md5($dados[model_usuario::SENHA]);
+      $dados[model_usuario::SENHA] = $dados[model_usuario::SENHA];
       settype($this->POST[model_usuario::ID], 'integer');
       $acao = $this->Model_Usuario->save($dados, $this->POST[model_usuario::ID]);
 
@@ -148,6 +158,51 @@ class Usuario extends MY_Controller {
       }
     } catch (Exception $exc) {
       echo $exc->getMessage();
+    }
+  }
+
+  public function atualizarUsuario() {
+    try {
+      if (empty($this->POST[model_usuario::SENHA])) {
+        $this->validar(TRUE, TRUE);
+        $campos = array(model_usuario::NOME, model_usuario::EMAIL);
+      } else {
+        $this->validar(TRUE);
+        $this->POST[model_usuario::SENHA] = md5($this->POST[model_usuario::SENHA]);
+        $campos = array(model_usuario::SENHA, model_usuario::NOME, model_usuario::EMAIL);
+      }
+      $dados = elements($campos, $this->POST);
+
+      settype($this->POST[model_usuario::ID], 'integer');
+      $acao = $this->Model_Usuario->save($dados, $this->POST[model_usuario::ID]);
+
+      if ($acao) {
+        $this->session->set_flashdata('SUCESSO', 'Usuário atualizado com sucesso.');
+      } else {
+        $this->session->set_flashdata('ERRO', 'Usuário não atualizado.');
+      }
+    } catch (Exception $exc) {
+      $this->session->set_flashdata('ERRO', $exc->getMessage());
+    }
+    redirect('dashboard');
+  }
+
+  public function editarUsuario() {
+
+    try {
+      if (empty($this->POST)) {
+        throw new Exception('Acesso negado.');
+      }
+
+      $ID = $this->POST['id'];
+      $this->data['menu_usuario'] = 'active';
+      $this->data['menu_admin'] = 'active';
+      $this->data['breadcrumb'] = $this->breadcrumb(array('Admin', 'usuario', 'editar'));
+      $this->data['usuario'] = $this->Model_Usuario->get($ID)[0];
+      $this->MY_view('usuario/editar_usuario', $this->data);
+    } catch (Exception $exc) {
+      $this->session->set_flashdata('ERRO', $exc->getMessage());
+      redirect('dashboard');
     }
   }
 

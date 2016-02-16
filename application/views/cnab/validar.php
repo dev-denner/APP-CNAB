@@ -16,14 +16,14 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="filial" class="col-sm-4 control-label">Filial</label>
-      <div class="col-sm-8">
-        <select name="<?php echo Model_Processo::FILIAL; ?>" id="filial" class="form-control" required>
-          <option value="">Defina a Filial</option>
-        </select>
-      </div>
-    </div>
+    <!--    <div class="form-group">
+          <label for="filial" class="col-sm-4 control-label">Filial</label>
+          <div class="col-sm-8">
+            <select name="<?php echo Model_Processo::FILIAL; ?>" id="filial" class="form-control" required>
+              <option value="">Defina a Filial</option>
+            </select>
+          </div>
+        </div>-->
 
     <div class="form-group">
       <label for="xls" class="col-sm-4 control-label">Enviar Arquivo</label>
@@ -51,6 +51,9 @@
       endforeach;
     endif;
     ?>
+    <?php if (!is_null($sucesso)) : ?> 
+      <p class="list-group-item text-success"><?php echo $sucesso; ?></p>
+    <?php endif; ?>
   </div>
 </div>
 
